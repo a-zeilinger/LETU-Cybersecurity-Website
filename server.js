@@ -1,92 +1,196 @@
 const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const { body, validationResult } = require('express-validator');
-const sanitizeHtml = require('sanitize-html');
-const xss = require('xss');
+const compression = require('compression');
+const morgan = require('morgan');
 const path = require('path');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const Redis = require('ioredis');
+const winston = require('winston');
+const expressWinston = require('express-winston');
+const cron = require('node-cron');
 require('dotenv').config();
 
+// Import security configuration
+const { createSecurityMiddleware } = require('./config/security');
+
+// Import routes
+const authRoutes = require('./routes/auth');
+const apiRoutes = require('./routes/api');
+const securityRoutes = require('./routes/security');
+const adminRoutes = require('./routes/admin');
+
+// Import middleware
+const { validateSecurity } = require('./middleware/security');
+const { errorHandler } = require('./middleware/errorHandler');
+const { requestLogger } = require('./middleware/logger');
+
+// Import services
+const SecurityMonitor = require('./services/SecurityMonitor');
+const CTFService = require('./services/CTFService');
+const NotificationService = require('./services/NotificationService');
+
+// Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      fontSrc: ["'self'", "https:"],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CORS_ORIGIN ? 
+      process.env.CORS_ORIGIN.split(',') : 
+      ['https://cybr.club', 'https://www.cybr.club'],
+    credentials: true
+  }
 });
 
-app.use(limiter);
+// Initialize Redis for caching and sessions
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.vercel.app'] 
-    : ['http://localhost:3000'],
-  credentials: true
-}));
+// Initialize security middleware
+const security = createSecurityMiddleware();
 
-// Body parsing middleware
+// Initialize services
+const securityMonitor = new SecurityMonitor();
+const ctfService = new CTFService();
+const notificationService = new NotificationService(io);
+
+// Configure logging
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'logs/combined.log' })
+  ]
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple()
+  }));
+}
+
+// Security middleware
+app.use(security.helmet);
+app.use(security.cors);
+app.use(security.rateLimit);
+app.use(security.securityHeaders);
+app.use(validateSecurity);
+
+// Additional middleware
+app.use(compression());
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Serve static files
-app.use(express.static('public'));
+// Session configuration
+app.use(session({
+  ...security.session,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/cybersecurity_club',
+    ttl: 24 * 60 * 60 // 1 day
+  })
+}));
 
-// Input sanitization middleware
-const sanitizeInput = (req, res, next) => {
-  if (req.body) {
-    Object.keys(req.body).forEach(key => {
-      if (typeof req.body[key] === 'string') {
-        req.body[key] = sanitizeHtml(req.body[key], {
-          allowedTags: [],
-          allowedAttributes: {}
-        });
-        req.body[key] = xss(req.body[key]);
-      }
-    });
+// Request logging middleware
+app.use(expressWinston.logger({
+  winstonInstance: logger,
+  meta: true,
+  msg: "HTTP {{req.method}} {{req.url}}",
+  expressFormat: true,
+  colorize: false
+}));
+
+// Serve static files with security headers
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+    res.setHeader('X-Content-Type-Options', 'nosniff');
   }
-  next();
-};
+}));
 
-// Contact form validation
-const contactValidation = [
-  body('name')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters')
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Name can only contain letters and spaces'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email address'),
-  body('message')
-    .trim()
-    .isLength({ min: 10, max: 1000 })
-    .withMessage('Message must be between 10 and 1000 characters')
-    .escape(),
-];
+// Database connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cybersecurity_club', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+  logger.info('Connected to MongoDB');
+})
+.catch((err) => {
+  logger.error('MongoDB connection error:', err);
+});
+
+// Redis connection
+redis.on('connect', () => {
+  logger.info('Connected to Redis');
+});
+
+redis.on('error', (err) => {
+  logger.error('Redis connection error:', err);
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  logger.info(`User connected: ${socket.id}`);
+  
+  // Join user to appropriate rooms based on their role
+  socket.on('join-room', (room) => {
+    socket.join(room);
+    logger.info(`User ${socket.id} joined room: ${room}`);
+  });
+  
+  // Handle CTF challenge submissions
+  socket.on('submit-flag', async (data) => {
+    try {
+      const result = await ctfService.validateFlag(data.challengeId, data.flag, socket.id);
+      socket.emit('flag-result', result);
+      
+      if (result.correct) {
+        // Broadcast to all users in the CTF room
+        io.to('ctf-room').emit('flag-captured', {
+          challengeId: data.challengeId,
+          userId: socket.id,
+          timestamp: new Date()
+        });
+      }
+    } catch (error) {
+      logger.error('Flag validation error:', error);
+      socket.emit('flag-result', { error: 'Validation failed' });
+    }
+  });
+  
+  // Handle real-time chat
+  socket.on('chat-message', (data) => {
+    const sanitizedMessage = securityMonitor.sanitizeInput(data.message);
+    io.to(data.room).emit('chat-message', {
+      userId: socket.id,
+      message: sanitizedMessage,
+      timestamp: new Date()
+    });
+  });
+  
+  socket.on('disconnect', () => {
+    logger.info(`User disconnected: ${socket.id}`);
+  });
+});
 
 // Routes
+app.use('/api/auth', authRoutes);
+app.use('/api', apiRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Main page routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -107,133 +211,107 @@ app.get('/contact', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'contact.html'));
 });
 
-// API Routes
-app.get('/api/events', (req, res) => {
-  const events = [
-    {
-      id: 1,
-      title: "Cybersecurity Workshop: Password Security",
-      date: "2024-02-15",
-      time: "18:00",
-      location: "Computer Science Building, Room 101",
-      description: "Learn about password security best practices, password managers, and how to create strong, unique passwords.",
-      image: "/images/event-password.jpg"
-    },
-    {
-      id: 2,
-      title: "CTF Competition: Capture The Flag",
-      date: "2024-02-28",
-      time: "19:00",
-      location: "Engineering Center, Lab 3",
-      description: "Join our monthly CTF competition! Test your hacking skills in a safe, controlled environment.",
-      image: "/images/event-ctf.jpg"
-    },
-    {
-      id: 3,
-      title: "Guest Speaker: Career in Cybersecurity",
-      date: "2024-03-10",
-      time: "17:30",
-      location: "Business School Auditorium",
-      description: "Industry professional shares insights about cybersecurity careers and industry trends.",
-      image: "/images/event-career.jpg"
-    }
-  ];
-  
-  res.json(events);
+app.get('/ctf', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'ctf.html'));
 });
 
-app.get('/api/blog', (req, res) => {
-  const blogPosts = [
-    {
-      id: 1,
-      title: "The Rise of Ransomware: What You Need to Know",
-      excerpt: "Ransomware attacks have increased by 150% in the last year. Learn how to protect yourself and your organization.",
-      content: "Ransomware has become one of the most significant cybersecurity threats facing individuals and organizations today. These malicious programs encrypt your files and demand payment for the decryption key. In this comprehensive guide, we'll explore the current state of ransomware attacks, common attack vectors, and effective prevention strategies...",
-      author: "Dr. Sarah Chen",
-      date: "2024-01-15",
-      readTime: "5 min read",
-      image: "/images/blog-ransomware.jpg"
-    },
-    {
-      id: 2,
-      title: "Zero-Day Vulnerabilities: Understanding the Threat",
-      excerpt: "Zero-day vulnerabilities represent the most dangerous type of security flaw. Here's what you need to understand.",
-      content: "A zero-day vulnerability is a software security flaw that is unknown to the vendor and has no available patch. These vulnerabilities are highly prized by attackers because they can be exploited before defenders have a chance to respond. This article explores the nature of zero-day vulnerabilities, how they're discovered and exploited, and what organizations can do to mitigate the risk...",
-      author: "Prof. Michael Rodriguez",
-      date: "2024-01-10",
-      readTime: "7 min read",
-      image: "/images/blog-zero-day.jpg"
-    },
-    {
-      id: 3,
-      title: "Social Engineering: The Human Factor in Cybersecurity",
-      excerpt: "The weakest link in any security system is often human psychology. Learn about social engineering tactics.",
-      content: "Social engineering attacks exploit human psychology rather than technical vulnerabilities. These attacks can be devastating because they bypass even the most sophisticated technical defenses. In this article, we'll examine common social engineering techniques, real-world examples, and strategies for building a security-aware culture...",
-      author: "Lisa Thompson",
-      date: "2024-01-05",
-      readTime: "6 min read",
-      image: "/images/blog-social-engineering.jpg"
-    }
-  ];
-  
-  res.json(blogPosts);
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Contact form endpoint
-app.post('/api/contact', sanitizeInput, contactValidation, (req, res) => {
-  const errors = validationResult(req);
-  
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array()
-    });
-  }
+// Security monitoring endpoint
+app.post('/api/security/csp-report', (req, res) => {
+  logger.warn('CSP Violation:', req.body);
+  securityMonitor.recordViolation(req.body);
+  res.status(200).send('OK');
+});
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  const health = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV,
+    version: process.env.npm_package_version || '2.0.0',
+    services: {
+      mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+      redis: redis.status === 'ready' ? 'connected' : 'disconnected'
+    }
+  };
+  
+  res.json(health);
+});
+
+// Scheduled security tasks
+cron.schedule('0 */6 * * *', async () => {
+  // Run security scan every 6 hours
   try {
-    const { name, email, message } = req.body;
-    
-    // Log the contact form submission (in production, you'd send an email)
-    console.log('Contact form submission:', {
-      name: name,
-      email: email,
-      message: message,
-      timestamp: new Date().toISOString(),
-      ip: req.ip
-    });
-
-    // In a real application, you would send an email here
-    // For now, we'll just return a success response
-    
-    res.status(200).json({
-      success: true,
-      message: 'Thank you for your message! We will get back to you soon.'
-    });
-    
+    await securityMonitor.runSecurityScan();
+    logger.info('Scheduled security scan completed');
   } catch (error) {
-    console.error('Contact form error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while processing your request.'
-    });
+    logger.error('Scheduled security scan failed:', error);
   }
 });
+
+cron.schedule('0 2 * * *', async () => {
+  // Clean up old logs and sessions daily at 2 AM
+  try {
+    await securityMonitor.cleanupOldData();
+    logger.info('Daily cleanup completed');
+  } catch (error) {
+    logger.error('Daily cleanup failed:', error);
+  }
+});
+
+// Error handling middleware
+app.use(errorHandler);
 
 // 404 handler
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Something went wrong!'
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  
+  // Close server
+  server.close(() => {
+    logger.info('HTTP server closed');
   });
+  
+  // Close database connections
+  await mongoose.connection.close();
+  await redis.quit();
+  
+  process.exit(0);
 });
 
-app.listen(PORT, () => {
-  console.log(`Cybersecurity Club website running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+process.on('SIGINT', async () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  
+  // Close server
+  server.close(() => {
+    logger.info('HTTP server closed');
+  });
+  
+  // Close database connections
+  await mongoose.connection.close();
+  await redis.quit();
+  
+  process.exit(0);
 });
+
+// Start server
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || 'localhost';
+
+server.listen(PORT, HOST, () => {
+  logger.info(`🚀 Cybersecurity Club Website running on ${HOST}:${PORT}`);
+  logger.info(`🔒 Security features: HTTPS enforcement, CSP, XSS protection, rate limiting enabled`);
+  logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`📊 Monitoring: Security logging, real-time alerts, automated scans enabled`);
+});
+
+module.exports = { app, server, io };

@@ -3,44 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Join the Cybersecurity Club - Learn about digital security, connect with industry professionals, and build your cybersecurity skills with like-minded professionals.">
-    <meta name="keywords" content="cybersecurity, security club, CTF, hacking, digital security, network security">
-    <meta name="author" content="Cybersecurity Club">
-    <meta property="og:title" content="Cybersecurity Club - Digitally Secure">
-    <meta property="og:description" content="Join our community of cybersecurity enthusiasts. Learn, practice, and grow your security skills.">
+    <meta name="description" content="LETU Cybersecurity Club - Master cybersecurity skills, compete in CTFs, and join a community of security professionals. Learn ethical hacking, network defense, and digital forensics.">
+    <meta name="keywords" content="cybersecurity, security club, CTF, ethical hacking, network security, digital forensics, LETU, security training">
+    <meta name="author" content="LETU Cybersecurity Club">
+    <meta property="og:title" content="LETU Cybersecurity Club - Master Digital Security">
+    <meta property="og:description" content="Join our community of cybersecurity enthusiasts. Learn cutting-edge security techniques and build your skills with industry professionals.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://your-domain.vercel.app">
-    <title>LETU Cybersecurity Club</title>
+    <meta property="og:url" content="https://cybr.club">
+    <meta property="og:image" content="/images/cyber-hero.jpg">
+    <title>LETU Cybersecurity Club - Master Digital Security</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/css/style.css" as="style">
+    <link rel="preload" href="/js/main.js" as="script">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 </head>
 <body>
-    <nav class="navbar">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="cyber-logo">
+                <div class="logo-grid">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+            </div>
+            <div class="loading-text">
+                <span class="loading-title">LETU Cybersecurity</span>
+                <span class="loading-subtitle">Initializing secure connection...</span>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="/">
-                    <span class="logo-text">LETU CyberSecurity</span>
-                    <span class="logo-accent">Club</span>
+                <a href="/" class="logo-link">
+                    <div class="logo-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-primary">LETU Cyber</span>
+                        <span class="logo-secondary">Security</span>
+                    </div>
                 </a>
             </div>
-            <ul class="nav-menu">
+            
+            <ul class="nav-menu" id="nav-menu">
                 <li class="nav-item">
-                    <a href="/" class="nav-link active">Home</a>
+                    <a href="/" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/events" class="nav-link">Events</a>
+                    <a href="/events" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Events</span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/leadership" class="nav-link">Leadership</a>
+                    <a href="/ctf" class="nav-link">
+                        <i class="fas fa-flag"></i>
+                        <span>CTF</span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/blog" class="nav-link">Blog</a>
+                    <a href="/blog" class="nav-link">
+                        <i class="fas fa-blog"></i>
+                        <span>Blog</span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/contact" class="nav-link">Contact</a>
+                    <a href="/leadership" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Leadership</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/contact" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contact</span>
+                    </a>
                 </li>
             </ul>
-            <div class="hamburger">
+            
+            <div class="nav-actions">
+                <button class="btn btn-outline" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </button>
+                <button class="btn btn-primary" id="join-btn">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Join Now</span>
+                </button>
+            </div>
+            
+            <div class="hamburger" id="hamburger">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -48,101 +133,421 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main>
-        <section class="hero">
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero-background">
+                <div class="cyber-grid-overlay"></div>
+                <div class="floating-elements">
+                    <div class="floating-element" data-speed="0.5">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="floating-element" data-speed="0.8">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="floating-element" data-speed="1.2">
+                        <i class="fas fa-code"></i>
+                    </div>
+                </div>
+            </div>
+            
             <div class="hero-container">
                 <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-star"></i>
+                        <span>#1 Cybersecurity Club in Texas</span>
+                    </div>
+                    
                     <h1 class="hero-title">
-                        <span class="highlight">Digitally Secure</span>
+                        Master the Art of
+                        <span class="hero-highlight">Digital Security</span>
                     </h1>
+                    
                     <p class="hero-description">
-                        Join our community of cybersecurity enthusiasts. Learn cutting-edge security techniques, 
-                        and build your skills with industry professionals.
+                        Join LETU's premier cybersecurity community. Learn ethical hacking, 
+                        compete in CTF competitions, and build real-world security skills 
+                        with industry professionals and fellow enthusiasts.
                     </p>
+                    
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">156+</div>
+                            <div class="stat-label">Active Members</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24</div>
+                            <div class="stat-label">Events This Year</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">Security Score</div>
+                        </div>
+                    </div>
+                    
                     <div class="hero-buttons">
-                        <a href="/events" class="btn btn-primary">Join Our Events</a>
-                        <a href="/contact" class="btn btn-secondary">Get In Touch</a>
+                        <a href="/ctf" class="btn btn-primary btn-large">
+                            <i class="fas fa-flag"></i>
+                            <span>Start CTF Challenge</span>
+                        </a>
+                        <a href="/events" class="btn btn-outline btn-large">
+                            <i class="fas fa-calendar"></i>
+                            <span>View Events</span>
+                        </a>
                     </div>
                 </div>
+                
                 <div class="hero-visual">
-                    <div class="cyber-grid">
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
-                        <div class="grid-cell"></div>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <div class="terminal-buttons">
+                                <span class="terminal-btn close"></span>
+                                <span class="terminal-btn minimize"></span>
+                                <span class="terminal-btn maximize"></span>
+                            </div>
+                            <div class="terminal-title">cyber@letu:~$</div>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command">nmap -sS 192.168.1.0/24</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">Starting Nmap 7.80...</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">Nmap scan report for 192.168.1.1</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">Host is up (0.001s latency).</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command blinking">_</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="features">
+        <!-- Features Section -->
+        <section class="features" id="features">
             <div class="container">
-                <h2 class="section-title">What We Offer</h2>
+                <div class="section-header">
+                    <h2 class="section-title">Why Choose LETU Cybersecurity?</h2>
+                    <p class="section-subtitle">Comprehensive training, real-world experience, and a supportive community</p>
+                </div>
+                
                 <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">🛡️</div>
-                        <h3>Security Workshops</h3>
-                        <p>Hands-on workshops covering password security, network defense, and ethical hacking techniques.</p>
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Expert-Led Training</h3>
+                        <p>Learn from industry professionals, certified security experts, and experienced faculty members.</p>
+                        <ul class="feature-list">
+                            <li>Hands-on workshops</li>
+                            <li>Certification prep</li>
+                            <li>Industry best practices</li>
+                        </ul>
                     </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">👥</div>
-                        <h3>Networking</h3>
-                        <p>Connect with industry professionals and fellow cybersecurity enthusiasts.</p>
+                    
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3>CTF Competitions</h3>
+                        <p>Test your skills in Capture The Flag competitions and climb the leaderboard.</p>
+                        <ul class="feature-list">
+                            <li>Monthly challenges</li>
+                            <li>National competitions</li>
+                            <li>Real-world scenarios</li>
+                        </ul>
                     </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">📚</div>
-                        <h3>Knowledge Sharing</h3>
-                        <p>Access to the latest cybersecurity research, tools, and best practices.</p>
+                    
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="feature-icon">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h3>Lab Environment</h3>
+                        <p>Access to state-of-the-art cybersecurity labs and virtual environments.</p>
+                        <ul class="feature-list">
+                            <li>Virtual machines</li>
+                            <li>Network simulators</li>
+                            <li>Security tools</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="feature-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>Industry Connections</h3>
+                        <p>Network with cybersecurity professionals and potential employers.</p>
+                        <ul class="feature-list">
+                            <li>Guest speakers</li>
+                            <li>Career fairs</li>
+                            <li>Internship opportunities</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="cta">
+        <!-- CTF Preview Section -->
+        <section class="ctf-preview" id="ctf-preview">
+            <div class="container">
+                <div class="ctf-content">
+                    <div class="ctf-text">
+                        <h2>Ready for a Challenge?</h2>
+                        <p>Test your cybersecurity skills with our interactive CTF challenges. From cryptography to web exploitation, there's something for every skill level.</p>
+                        <div class="ctf-stats">
+                            <div class="ctf-stat">
+                                <span class="stat-number">12</span>
+                                <span class="stat-label">Active Challenges</span>
+                            </div>
+                            <div class="ctf-stat">
+                                <span class="stat-number">89</span>
+                                <span class="stat-label">Participants</span>
+                            </div>
+                            <div class="ctf-stat">
+                                <span class="stat-number">234</span>
+                                <span class="stat-label">Flags Captured</span>
+                            </div>
+                        </div>
+                        <a href="/ctf" class="btn btn-primary btn-large">
+                            <i class="fas fa-flag"></i>
+                            <span>Start Hacking</span>
+                        </a>
+                    </div>
+                    <div class="ctf-visual">
+                        <div class="challenge-preview">
+                            <div class="challenge-card">
+                                <div class="challenge-header">
+                                    <span class="difficulty easy">Easy</span>
+                                    <span class="category">Crypto</span>
+                                </div>
+                                <h3>Simple XOR</h3>
+                                <p>Decrypt the message using XOR with key 'SECRET'</p>
+                                <div class="challenge-meta">
+                                    <span class="points">100 pts</span>
+                                    <span class="solved">45 solves</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Preview Section -->
+        <section class="events-preview" id="events-preview">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Upcoming Events</h2>
+                    <p class="section-subtitle">Join our workshops, competitions, and networking events</p>
+                </div>
+                
+                <div class="events-grid" id="events-grid">
+                    <!-- Events will be loaded dynamically -->
+                </div>
+                
+                <div class="events-cta">
+                    <a href="/events" class="btn btn-outline btn-large">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>View All Events</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta" id="cta">
             <div class="container">
                 <div class="cta-content">
                     <h2>Ready to Start Your Cybersecurity Journey?</h2>
-                    <p>Join our next event and become part of a community dedicated to digital security.</p>
-                    <a href="/events" class="btn btn-primary">View Upcoming Events</a>
+                    <p>Join hundreds of students who are already building their security skills and advancing their careers.</p>
+                    <div class="cta-buttons">
+                        <a href="/contact" class="btn btn-primary btn-large">
+                            <i class="fas fa-envelope"></i>
+                            <span>Get In Touch</span>
+                        </a>
+                        <a href="/events" class="btn btn-outline btn-large">
+                            <i class="fas fa-calendar"></i>
+                            <span>Join Next Event</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="footer">
+    <!-- Footer -->
+    <footer class="footer" id="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>LETU Cybersecurity Club</h3>
+                    <div class="footer-logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="logo-text">
+                            <span class="logo-primary">LETU Cyber</span>
+                            <span class="logo-secondary">Security</span>
+                        </div>
+                    </div>
                     <p>Empowering the next generation of cybersecurity professionals through education, practice, and community.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Discord" class="social-link">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="#" aria-label="GitHub" class="social-link">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="social-link">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" aria-label="Twitter" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
                 </div>
+                
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <ul>
+                    <ul class="footer-links">
                         <li><a href="/events">Events</a></li>
+                        <li><a href="/ctf">CTF Challenges</a></li>
                         <li><a href="/blog">Blog</a></li>
                         <li><a href="/leadership">Leadership</a></li>
                         <li><a href="/contact">Contact</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-section">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        <a href="#" aria-label="Discord">Discord</a>
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="/resources">Learning Resources</a></li>
+                        <li><a href="/tools">Security Tools</a></li>
+                        <li><a href="/careers">Career Guide</a></li>
+                        <li><a href="/certifications">Certifications</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Longview, TX 75605</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>cyber@letu.edu</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>(903) 233-3000</span>
+                        </div>
                     </div>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <p>&copy; 2024 LETU Cybersecurity Club. All rights reserved.</p>
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 LETU Cybersecurity Club. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="/privacy">Privacy Policy</a>
+                        <a href="/terms">Terms of Service</a>
+                        <a href="/security">Security</a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login to Your Account</h3>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </button>
+                </form>
+                <div class="auth-links">
+                    <a href="#" id="forgot-password">Forgot Password?</a>
+                    <span>Don't have an account? <a href="#" id="show-register">Sign up</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Your Account</h3>
+                <button class="modal-close" id="register-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" name="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Create Account</span>
+                    </button>
+                </form>
+                <div class="auth-links">
+                    <span>Already have an account? <a href="#" id="show-login">Login</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="/js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    </script>
 </body>
 </html> 
