@@ -1,7 +1,6 @@
 {
   "version": 2,
   "name": "letu-cybersecurity-website",
-  "description": "Modern and secure website for LETU Cybersecurity Club with advanced security features",
   "builds": [
     {
       "src": "server.js",
