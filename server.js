@@ -236,4 +236,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Cybersecurity Club website running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-}); 
+});
