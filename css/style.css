@@ -420,11 +420,6 @@ button:focus-visible {
   gap: 1rem;
   align-items: center;
   padding: 1rem 1.2rem;
-  border-left: 3px solid transparent;
-}
-
-.schedule-item:hover {
-  border-left-color: var(--gold);
 }
 
 .schedule-item h2 {
