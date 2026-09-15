@@ -468,11 +468,84 @@ button:focus-visible {
   margin: 0;
 }
 
+.schedule-link {
+  color: inherit;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.schedule-link:hover {
+  color: inherit;
+  border-color: var(--blue);
+  box-shadow: 6px 6px 0 rgba(0, 119, 182, .2);
+  transform: translateY(-2px);
+}
+
+.schedule-link:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--blue-light);
+  font-weight: 800;
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.resource-card {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.6rem;
+  background: rgba(16, 35, 47, .94);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--blue);
+  color: var(--muted);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.resource-card:nth-child(2) {
+  border-top-color: var(--gold);
+}
+
+.resource-card:hover {
+  color: var(--muted);
+  border-color: var(--blue-light);
+  box-shadow: 8px 8px 0 rgba(0, 119, 182, .18);
+  transform: translateY(-2px);
+}
+
+.resource-card h2 {
+  margin: .35rem 0 .7rem;
+  color: var(--text);
+}
+
+.resource-card p {
+  margin: 0 0 1.4rem;
+}
+
+.resource-action {
+  margin-top: auto;
+  color: var(--gold);
+  font-weight: 800;
+}
+
 @media (max-width: 800px) {
   body::before {
     opacity: .14;
     -webkit-mask-image: none;
     mask-image: none;
+  }
+
+  .resource-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero-grid,
